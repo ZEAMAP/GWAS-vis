@@ -1,0 +1,200 @@
+<?php
+
+require_once 'api/zmap_gwasviz.api.inc';
+require_once 'api/zmap_gwasviz_single_trait.api.inc';
+require_once 'api/zmap_gwasviz_single_variant.api.inc';
+require_once 'api/zmap_gwasviz_multi_trait.api.inc';
+
+/**
+ * Implements hook_menu.
+ */
+function zmap_gwasviz_menu()
+{
+    $items['gwasviz/single_trait'] = array(
+        'title' => 'GWAS Single-Trait',
+        'page callback' => 'zmap_gwasviz_single_trait_view',
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    $items['gwasviz/single_variant/%'] = array(
+        'title' => 'GWAS Single-Variant',
+        'page callback' => 'zmap_gwasviz_single_variant_view',
+        'page arguments' => array(2),
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    $items['gwasviz/single_variant'] = array(
+        'title' => 'GWAS Single-Variant',
+        'page callback' => 'zmap_gwasviz_single_variant_view',
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    $items['gwasviz/multi_trait'] = array(
+        'title' => 'GWAS Multi-Trait',
+        'page callback' => 'zmap_gwasviz_multi_trait_view',
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    /*  ---ZMap GWASVIZ api group--- */
+    //gwasviz api for retrive trait category data
+    $items['api/gwasviz/retrive_trait_category/%'] = array(
+        'title' => 'retrive trait category',
+        'page callback' => 'api_gwasviz_retrive_trait_category',
+        'page arguments' => array(3),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    // gwasviz api for retrive gwas gene data
+    $items['api/gwasviz/retrive_gene/chr/%'] = array(
+        'title' => 'GWAS Single-Trait',
+        'page callback' => 'api_gwasviz_retrive_gene',
+        'page arguments' => array(4, 6, 8),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    // gwasviz api for retrive gwas assoc data
+    $items['api/gwasviz/retrive_assoc/trait/%'] = array(
+        'title' => 'GWAS Single-Trait',
+        'page callback' => 'api_gwasviz_retrive_assoc',
+        'page arguments' => array(4, 6, 8, 10),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    /*  ---ZMap GWASVIZ Single-Trait api group--- */
+    //gwasviz single trait api for retrive gwas ld data
+    $items['api/gwasviz/single_trait/ld/%'] = array(
+        'title' => 'GWAS Single-Trait',
+        'page callback' => 'api_gwasviz_single_trait_retrive_ld',
+        'page arguments' => array(5, 7, 9, 11, 13),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    //gwasviz api for retrive gwas echart data
+    $items['api/gwasviz/retrive_echart/trait/%'] = array(
+        'title' => 'retrive echart data',
+        'page callback' => 'api_gwasviz_retrive_echart',
+        'page arguments' => array(4),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    //gwasviz single trait api for retrive trait best region
+    $items['api/gwasviz/single_trait/best_region/trait/%'] = array(
+        'title' => 'retrive echart data',
+        'page callback' => 'api_gwasviz_single_trait_retrive_best_region',
+        'page arguments' => array(5),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    /*  ---ZMap GWASVIZ Single-Variant api group--- */
+    $items['api/gwasviz/single_variant/retrive_phewas/%'] = array(
+        'title' => 'retrive echart data',
+        'page callback' => 'api_gwasviz_single_variant_retrive_phewas',
+        'page arguments' => array(4),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    return $items;
+}
+
+/**
+ * Implements hook_theme.
+ */
+function zmap_gwasviz_theme()
+{
+    $path = drupal_get_path('module', 'zmap_gwasviz');
+    $theme = array(
+        'zmap_gwasviz_single_trait' => array(
+            'template' => 'zmap_gwasviz_single_trait',
+            'path' => "$path/theme",
+        ),
+        'zmap_gwasviz_single_variant' => array(
+            'template' => 'zmap_gwasviz_single_variant',
+            'path' => "$path/theme",
+        ),
+        'zmap_gwasviz_multi_trait' => array(
+            'template' => 'zmap_gwasviz_multi_trait',
+            'path' => "$path/theme",
+        ),
+    );
+
+    return $theme;
+}
+
+function zmap_gwasviz_single_trait_view()
+{
+    $path = drupal_get_path('module', 'zmap_gwasviz');
+    //add css
+    drupal_add_css($path.'/theme/css/locuszoom.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/skeleton.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/zTreeStyle.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/gwasviz_single_trait.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+
+    //add js
+    drupal_add_js($path.'/theme/js/jquery.js');
+    drupal_add_js($path.'/theme/js/single_trait/locuszoom.vendor.min.js');
+    drupal_add_js($path.'/theme/js/single_trait/locuszoom.app.min.js');
+    drupal_add_js($path.'/theme/js/single_trait/lz-dynamic-urls.min.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.core.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.excheck.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.exedit.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.exhide.js');
+    drupal_add_js($path.'/theme/js/ext/fuzzysearch.js');
+    drupal_add_js($path.'/theme/js/ext/echarts.min.js');
+    drupal_add_js($path.'/theme/js/single_trait/zmap_gwasviz_single_trait.js');
+
+    return theme('zmap_gwasviz_single_trait');
+}
+
+function zmap_gwasviz_multi_trait_view()
+{
+    $path = drupal_get_path('module', 'zmap_gwasviz');
+
+    //add css
+    drupal_add_css($path.'/theme/css/locuszoom.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/skeleton.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/zTreeStyle.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/gwasviz_multi_trait.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+
+    //add js
+    drupal_add_js($path.'/theme/js/jquery.js');
+    drupal_add_js($path.'/theme/js/multi_trait/locuszoom.vendor.min.js');
+    drupal_add_js($path.'/theme/js/multi_trait/locuszoom.app.min.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.core.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.excheck.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.exedit.js');
+    drupal_add_js($path.'/theme/js/ext/jquery.ztree.exhide.js');
+    drupal_add_js($path.'/theme/js/ext/fuzzysearch.js');
+    drupal_add_js($path.'/theme/js/ext/echarts.min.js');
+    drupal_add_js($path.'/theme/js/multi_trait/zmap_gwasviz_multi_trait.js');
+
+    return theme('zmap_gwasviz_multi_trait');
+}
+
+function zmap_gwasviz_single_variant_view($variant = 'chr6.s_108217003')
+{
+    $path = drupal_get_path('module', 'zmap_gwasviz');
+
+    //add css
+    drupal_add_css($path.'/theme/css/locuszoom.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/skeleton.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    drupal_add_css($path.'/theme/css/gwasviz_single_variant.css', array('group' => CSS_DEFAULT, 'every_page' => false));
+    //add js
+    drupal_add_js(array('zmap_gwasviz_single_variant' => array('variant' => $variant)), 'setting');
+    drupal_add_js($path.'/theme/js/jquery.js');
+    drupal_add_js($path.'/theme/js/single_variant/locuszoom.vendor.min.js');
+    drupal_add_js($path.'/theme/js/single_variant/locuszoom.app.min.js');
+    drupal_add_js($path.'/theme/js/single_variant/zmap_gwasviz_single_variant.js');
+
+    return theme('zmap_gwasviz_single_variant');
+}

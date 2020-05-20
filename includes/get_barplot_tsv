@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Get data for GWAS barplot.
+# 需要下载 csvtk https://github.com/shenwei356/csvtk/releases
+
+if [ $# -lt 2 ];
+then echo "
+------------------------------------------------------
+Get data for GWAS barplot in Maize database.
+                                    Songtao Gui
+                                    songtaogui@sina.com
+------------------------------------------------------
+USAGE:
+	$(basename $0) <trait1,trait2...> <GWAS_Bin.tsv> [bestregion]
+
+If 'bestregion' was set, print out only the min P-value region,
+print out the whole bin info if NOT.
+
+GWAS_Bin.tsv FORMAT:
+   <Chr>   <Region>      <Trait1>     <Triat2>
+   chr1    1:0-500000    -logPvalue1 -logPvalue2
+eg:
+    Chr     Region              100grainweight          Ala
+    chr1    1:0-500000          2.31630146832606        1.80738619280076
+    chr1    1:500000-1000000    2.16586921946003        2.47204817043131
+    chr1    1:1000000-1500000   2.20326973727822        2.14769705404575
+------------------------------------------------------
+NOTE: 
+	csvtk should be put in PATH
+	(Get it here: https://github.com/shenwei356/csvtk/releases)
+";
+exit 1;
+fi
+
+if ! which csvtk >/dev/null 2>&1 ;then
+echo "Missing csvtk. Please add it to PAHT" >&2
+exit 1
+fi
+
+#cut -f 3,6- gwas_74_trait_win500K.tsv | perl -lane 'BEGIN{use POSIX qw(log10);}$.==1 && print && next; for($i=2;$i<=$#F;$i++){$F[$i]=1 if $F[$i] eq ".";$F[$i]=-log10($F[$i]);$F[$i]=0 if $F[$i] eq "Inf";} $,="\t";$F[0]="chr$F[0]";print @F;' >gwas_74_trait_win500K_logp.tsv
+
+export trait=$1
+tsv=$2
+mode=$3
+if [ ! -s $tsv ];then echo "ERROR --> No file: $tsv";exit 1;fi
+# 1 -- chr 2 --region 3--logP 4--trait of the logP
+out=$( 
+csvtk transpose -tTH $tsv | perl -F"\t" -lane '
+	BEGIN{ @trait=split(/,/,$ENV{trait}); } 
+	$. == 1 && print && next; 
+	$. == 2 && print && next;
+	print if grep /^$F[0]$/, @trait ;' |\
+csvtk transpose -tTH | perl -F"\t" -lane ' 
+	BEGIN{use List::Util qw/reduce/;}
+	if($. == 1){ @trait = @F[2..$#F]; next;}
+	@lpv=@F[2..$#F];
+	$maxpidx= reduce { $lpv[$a] > $lpv[$b] ? $a : $b } (0 .. $#lpv);
+	$maxpv=$lpv[$maxpidx];
+	$maxpt=$trait[$maxpidx];
+	$,="\t"; 
+	print $F[1],$maxpv,$F[0],$maxpt;' 
+)
+
+maxregion=$(echo "$out" | sort -k2,2nr | head -1 | cut -f 1 )
+
+if [ "$mode" = "bestregion" ];then
+	echo "$maxregion"
+else
+	echo "$out" | perl -pe 's/\n/,/'
+fi
+
+

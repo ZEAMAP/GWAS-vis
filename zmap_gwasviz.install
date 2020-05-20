@@ -1,0 +1,176 @@
+<?php
+
+/**
+ * Implements hook_schema.
+ */
+function zmap_gwasviz_schema()
+{
+    $schema['zmap_gwasviz_gene'] = array(
+        'description' => 'This table used for store zmap gwas gene info',
+        'fields' => array(
+            'gene_id' => array(
+                'type' => 'varchar',
+                'length' => 32,
+            ),
+            'gene_name' => array(
+                'type' => 'varchar',
+                'length' => 64,
+            ),
+            'gene_chr' => array(
+                'type' => 'varchar',
+                'length' => 16,
+            ),
+            'gene_start' => array(
+                'type' => 'int',
+            ),
+            'gene_end' => array(
+                'type' => 'int',
+            ),
+            'gene_strand' => array(
+                'type' => 'char',
+                'length' => 2,
+            ),
+        ),
+        // drupal schema will prefixes index name with table name.
+        'indexes' => array(
+            'gene_start' => array('gene_start'),
+            'gene_end' => array('gene_end'),
+        ),
+    );
+
+    $schema['zmap_gwasviz_transcript'] = array(
+        'description' => 'This table used for store zmap gwas gene transcript info',
+        'fields' => array(
+            'gene_id' => array(
+                'type' => 'varchar',
+                'length' => 32,
+            ),
+            'trans_id' => array(
+                'type' => 'varchar',
+                'length' => 32,
+            ),
+            'trans_name' => array(
+                'type' => 'varchar',
+                'length' => 32,
+            ),
+            'trans_chr' => array(
+                'type' => 'varchar',
+                'length' => 16,
+            ),
+            'trans_start' => array(
+                'type' => 'int',
+            ),
+            'trans_end' => array(
+                'type' => 'int',
+            ),
+            'trans_strand' => array(
+                'type' => 'char',
+                'length' => 2,
+            ),
+        ),
+        'indexes' => array(
+            'gene_id' => array('gene_id'),
+        ),
+    );
+
+    $schema['zmap_gwasviz_exon'] = array(
+        'description' => 'This table used for store zmap gwas gene exon info',
+        'fields' => array(
+            'gene_id' => array(
+                'type' => 'varchar',
+                'length' => 32,
+            ),
+            'trans_id' => array(
+                'type' => 'varchar',
+                'length' => 32,
+            ),
+            'exon_id' => array(
+                'type' => 'varchar',
+                'length' => 128,
+            ),
+            'exon_chr' => array(
+                'type' => 'varchar',
+                'length' => 16,
+            ),
+            'exon_start' => array(
+                'type' => 'int',
+            ),
+            'exon_end' => array(
+                'type' => 'int',
+            ),
+            'exon_strand' => array(
+                'type' => 'char',
+                'length' => 2,
+            ),
+        ),
+        'indexes' => array(
+            'gene_id' => array('gene_id'),
+            'trans_id' => array('trans_id'),
+        ),
+    );
+
+    $schema['zmap_gwasviz_assoc'] = array(
+        'description' => 'This table used for store zmap gwas assoc info',
+        'fields' => array(
+            'trait' => array(
+                'type' => 'varchar',
+                'length' => 255,
+            ),
+            'snpid' => array(
+                'type' => 'varchar',
+                'length' => 255,
+            ),
+            'chr' => array(
+                'type' => 'int',
+            ),
+            'posi' => array(
+                'type' => 'int',
+            ),
+            'log_pvalue' => array(
+                'type' => 'float',
+                'size' => 'big',
+            ),
+            'ref_allele' => array(
+                'type' => 'varchar',
+                'length' => 255,
+            ),
+            'alt' => array(
+                'type' => 'varchar',
+                'length' => 255,
+            ),
+        ),
+        'indexes' => array(
+            'trait' => array('trait'),
+            'posi' => array('posi'),
+        ),
+    );
+
+    $schema['zmap_gwasviz_trait_category'] = array(
+        'description' => 'This table used for store zmap gwas trait category info',
+        'fields' => array(
+            'id' => array(
+                'type' => 'int',
+            ),
+            'name' => array(
+                'type' => 'varchar',
+                'length' => 64,
+            ),
+            'pid' => array(
+                'type' => 'int',
+            ),
+	    'has_child' => array(
+		'type' => 'int',
+	    ),
+        ),
+    );
+
+    return $schema;
+}
+
+/**
+ * Implements hook_uninstall.
+ */
+function zmap_gwasviz_uninstall()
+{
+    drupal_uninstall_schema('zmap_gwasviz');
+}

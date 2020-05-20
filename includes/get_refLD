@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# 从LD文件中提取指定snp id 的 ld 数据
+# 需要下载 csvtk https://github.com/shenwei356/csvtk/releases
+
+if [ $# -ne 3 ]; 
+then echo "
+USAGE: 
+    bash $(basename $0) <refSNP> <snpid1,snpid2 ...> <XXX.LD>
+NOTE: csvtk should in PATH 
+    (Get it here: https://github.com/shenwei356/csvtk/releases)
+"; 
+    exit 1;
+fi
+
+if ! which csvtk >/dev/null 2>&1 ;then
+    echo "Missing csvtk. Please add it to PAHT"
+    exit 1
+fi
+
+refid=$1
+snplist=$2
+ld=$3
+if [ ! -s $ld ];then 
+    echo "[ERROR] No file: $ld";exit 1;
+fi
+
+ld_out=$(csvtk grep -tTH -f 1-2 -p $refid $ld |\
+csvtk grep -tTH -f 1-2 -P <(echo "$snplist" | sed 's/,/\n/g') |\
+while read site1 site2 r2
+do
+	if [ "$site2" = "$refid" ];then
+		echo -e "$site2\t$site1\t$r2"
+	else
+		echo -e "$site1\t$site2\t$r2"
+	fi
+done | perl -pe 's/\n/,/g unless eof' )
+# sed ':a;N;$!ba;s/\n/,/g'
+echo "$ld_out" 

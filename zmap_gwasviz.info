@@ -1,0 +1,5 @@
+name = Zmap GWAS Visualization
+description = Zmap GWAS Visualization.
+project = zmap_gwasviz
+package = Zmap
+core = 7.x

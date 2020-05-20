@@ -1,0 +1,53 @@
+.gwas-content {
+    padding-left: 50px;
+}
+.gwasFilter {
+    margin-bottom: 10px;
+}
+#fuzzySearch {
+    width: 150px;
+    height: 35px;
+} 
+#gwasRegion {
+    width: 260px;
+    height: 35px;
+}
+.fuzzySearch, .gwasRegion {
+    float: left;
+    margin-right: 50px;
+}
+.fuzzySearch {
+    position: relative;
+}
+#gwasSearch {
+    height: 35px;
+}
+#zmap-gwas-phenotype-tree { 
+    background-color: white;
+    opacity: 0.9;
+    height: 330px;
+    overflow: auto;
+    position: absolute;
+    display: none;
+    padding-left: 40px;
+    z-index: 2;
+}
+#messageBox {
+    color: red;
+}
+.browse-gene {
+    width: 420px;
+}
+
+#echart-gwas {
+    margin-bottom: 20px;
+    width: 1000px;
+    height: 250px;
+}
+#view-more-info {
+    padding-bottom: 15px;
+    display: none;
+}
+#selected_trait {
+    color: blue;
+}
